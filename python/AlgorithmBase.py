@@ -29,3 +29,6 @@ class AlgorithmBase(object):
     @abc.abstractmethod
     def NeedToBeFilledInLoop(self):
         return False
+    @abc.abstractmethod
+    def NeedToBeRun(self,eventType):
+        return False

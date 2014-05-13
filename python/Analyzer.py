@@ -3,7 +3,11 @@ __author__ = 'ja'
 from ROOT import *
 from Exceptions import  *
 from Chi2Analyzer import *
+from RooFitMassJPsi import  *
+
 from NTupleHandler import *
+
+
 import os.path
 
 
@@ -14,6 +18,7 @@ class Analyzer(object):
         # initialization of algorithm dictionary"
         self.algorithms={ }
         self.algorithms["Chi2Analyzer"]=Chi2Analyzer()
+        self.algorithms["RooFitMassJPsi"]=RooFitMassJPsi()
 
         # initialization of event types"
         self.eventTypes= ["StdLooseJpsi2MuMuTuple", "StdLooseKsLLTuple", "StdLooseKsDDTuple", "StdKs2PiPiLLTuple","StdKs2PiPiDDTuple" ]

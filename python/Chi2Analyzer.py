@@ -1,7 +1,7 @@
 __author__ = 'ja'
 
 from AlgorithmBase import *
-from ROOT import  *
+
 
 
 class Chi2Analyzer(AlgorithmBase):
@@ -12,6 +12,9 @@ class Chi2Analyzer(AlgorithmBase):
 
     def NeedToBeFilledInLoop(self):
         return False
+
+    def NeedToBeRun(self,eventType):
+        return True
 
 
     def Fill(self, tree):
