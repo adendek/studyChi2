@@ -2,57 +2,44 @@ __author__ = 'ja'
 
 from ROOT import *
 from Exceptions import  *
+from Chi2Analyzer import *
+from NTupleHandler import *
 import os.path
 
 
-class Analyzer:
-    def __init__(self, fileName, eventType):
-        self.histograms={ }
-        "initialization of the NTuple"
+class Analyzer(object):
+    def __init__(self,dataFile , outFile):
+        print "Start the analyzer"
+        self.dataFile=dataFile
+        # initialization of algorithm dictionary"
+        self.algorithms={ }
+        self.algorithms["Chi2Analyzer"]=Chi2Analyzer()
+
+        # initialization of event types"
+        self.eventTypes= ["StdLooseJpsi2MuMuTuple", "StdLooseKsLLTuple", "StdLooseKsDDTuple", "StdKs2PiPiLLTuple","StdKs2PiPiDDTuple" ]
+        # create output file
+        self.fout=TFile(outFile,"RECREATE")
+        for eventType in self.eventTypes:
+            self.fout.mkdir(eventType)
 
 
+    def runAnalysis(self):
+        for eventType in self.eventTypes:
+            print "Start event type "+eventType
+            tree=NTupleHandler(self.dataFile,eventType)
+            # loop over algorithms
+            for  algorithm in self.algorithms.itervalues():
+                # fill the historams
+                for event in range(0,tree.getEntry()):
+                    if algorithm.NeedToBeFilledInLoop():
+                        algorithm.Fill(tree)
+                if not algorithm.NeedToBeFilledInLoop():
+                    algorithm.Fill(tree)
+                #process data
+                algorithm.ProcessData()
+                # save output
+                self.fout.cd(eventType)
+                algorithm.SaveOutput()
+                #clear data
+                algorithm.ClearData()
 
-    def runAnalysis(self,fileName, eventType):
-        if not os.path.isfile(fileName):
-            raise InputError( fileName)
-        f = TFile(fileName, 'read')
-        if f is None:
-            raise InputError("openError"+fileName)
-        dir=f.Get(eventType)
-        if dir is None:
-            raise InputError("directory Error"+eventType)
-        self.tree=dir.Get('particle')
-        self.tree.Clone("particle")
-        # start process
-        self.basicPlots()
-
-        # finalize process
-        self.saveHistogramsIntoFile("../out/MC.root")
-
-
-
-    def saveHistogramsIntoFile(self,fileOut):
-        print isinstance(self.tree,TTree)
-        fout=TFile(fileOut,"RECREATE")
-        for histogram in self.histograms.itervalues():
-            histogram.Write()
-        fout.Close()
-
-    def basicPlots(self):
-                # put data into histograms
-        self.tree.Draw("track0.chi2PerDof>>h_chi2PerDof_track0")
-        self.tree.Draw("track1.chi2PerDof>>h_chi2PerDof_track1")
-
-        self.histograms["h_chi2PerDof_track0"]= gROOT.FindObject("h_chi2PerDof_track0")
-        self.histograms["h_chi2PerDof_track1"]= gROOT.FindObject("h_chi2PerDof_track1")
-        list=TList()
-        list.Add(self.histograms["h_chi2PerDof_track0"])
-        list.Add(self.histograms["h_chi2PerDof_track1"])
-
-
-
-
-
-if __name__ == "__main__":
-    a=Analyzer('../data/new_NTuple.root','StdLooseJpsi2MuMuTuple')
-    a.runAnalysis('../data/new_NTuple.root','StdLooseJpsi2MuMuTuple')

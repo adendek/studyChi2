@@ -16,7 +16,7 @@ class MyTestCase(unittest.TestCase):
     def testHandlerShouldReturnNoEvents(self):
 
         handler= NTupleHandler('../data/new_NTuple.root','StdLooseJpsi2MuMuTuple')
-        self.assertLess(handler.getEntry(),10)
+        self.assertGreater(handler.getEntry(),0)
         handler.getEntry()
 
 if __name__ == '__main__':
