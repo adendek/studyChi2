@@ -14,7 +14,7 @@ class RooFitMassJPsi(AlgorithmBase):
         return False
 
     def NeedToBeRun(self,eventType):
-        if eventType == "StdLooseKsLLTuple":
+        if eventType == "StdLooseJpsi2MuMuTuple":
             return True
         else:
             return False
@@ -22,16 +22,18 @@ class RooFitMassJPsi(AlgorithmBase):
 
     def Fill(self, tree):
         print "Begin fill RooFitMassJPsi with"
-        histogramName="MM"
+        branchName="MM"
+        self.histogramName="h_"+branchName
+        cmd= branchName+ ">>" + self.histogramName
 
-        tree.tree.Draw(histogramName)
-        self.histograms[histogramName]= gROOT.FindObject(histogramName)
+        tree.tree.Draw(cmd)
+        self.histograms[self.histogramName]= gROOT.FindObject(self.histogramName)
         print "End of fill RooFitMassJPsi"
 
 
     def ProcessData(self):
+        # this is a little bit silly but without default initialization of RooFit object the program doesnt work
         x= RooRealVar("x","mass JPsi",3.03,3.17,"GeV")
-
         mean1= RooRealVar("mean1","mean1",3.1,0,10)
         mean2= RooRealVar("mean2","mean2",3.0,0,10)
         sigma1= RooRealVar("sigma1","sigma1",5,0,10)
@@ -45,19 +47,44 @@ class RooFitMassJPsi(AlgorithmBase):
         frac= RooRealVar("frac","signal fraction",0.1,0.,1.)
         frac2= RooRealVar ("frac2","signal fraction",0.3,0.,1.)
 
-        nsigRooRealVar= RooRealVar("nsig","#signal events",39600,0.,1e10)
-        nsig1RooRealVar= RooFormulaVar("nsig1","@0 * @1",RooArgList(frac,nsig))
-        RooFormulaVar= nsig2("nsig2","@0 * @1",RooArgList(frac2,nsig))
-        RooRealVar= nbkg("nbkg","#background events",2430,100,1e10)
+        nsig= RooRealVar("nsig","#signal events",39600,0.,1e10)
+        nsig1= RooFormulaVar("nsig1","@0 * @1",RooArgList(frac,nsig))
+        nsig2=RooFormulaVar("nsig2","@0 * @1",RooArgList(frac2,nsig))
+        nbkg=RooRealVar("nbkg","#background events",2430,100,1e10)
 
+        #create the model
         model = RooAddPdf("model","(g1+g2)+a",RooArgList(gauss1,gauss2,background),RooArgList(nsig1,nsig2,nbkg))
 
-        data=RooDataHist("data","data",x,Import(self.histograms["MM"]))
-        self.result=model.fitTo(data,RooFit.Extended(), RooFit.Minos(), RooFit.Save())
+        # get data
+        ral = RooArgList(x) # according to RooTalk advice
+        data=RooDataHist("data","data",ral,RooFit.Import(self.histograms[self.histogramName]))
+        #fit to data and
 
+        result=model.fitTo(data,RooFit.Extended(), RooFit.Minos(), RooFit.Save())
+        self.histograms["fited"]=data
 
+        # create output
+        xframe=x.frame(RooFit.Title("Mass Fit JPsi"))
+        data.plotOn(xframe,RooFit.Name("data"),RooFit.DataError(RooAbsData.SumW2))
+        model.plotOn(xframe, RooFit.Name("model"))
+        model.plotOn(xframe, RooFit.Components("gauss1"),RooFit.LineColor(kBlack), RooFit.LineStyle(ROOT.kDashed))
+        model.plotOn(xframe, RooFit.Components("gauss2"),RooFit.LineColor(kGreen), RooFit.LineStyle(kDashed))
+        model.plotOn(xframe, RooFit.Components("background"),RooFit.LineColor(kRed),RooFit. LineStyle(kDashed))
+        self.histograms["Fit"]=xframe
+        ################### residual and pull distributions ######################################
+        hresid = xframe.residHist("data","model")
 
+        #Construct a histogram with the pulls of the data w.r.t the curve
+        hpull = xframe.pullHist("data","model")
+        #Create a new frame to draw the residual distribution and add the distribution to the frame
+        frame1 = x.frame(RooFit.Title("Residual Distribution"))
+        frame1.addPlotable(hresid,"P")
+        self.histograms["Residual"]=frame1
 
+        #Create a new frame to draw the pull distribution and add the distribution to the frame
+        frame2 = x.frame(RooFit.Title("Pull Distribution"))
+        frame2.addPlotable(hpull,"P")
+        self.histograms["Pull"]=frame2
 
 
     def SaveOutput(self):
@@ -65,8 +92,9 @@ class RooFitMassJPsi(AlgorithmBase):
         gDirectory.cd("RooFitMassJPsi")
         for histogram in self.histograms.itervalues():
             histogram.Write()
-        self.result.Write()
 
 
     def ClearData(self):
         self.histograms= { }
+
+

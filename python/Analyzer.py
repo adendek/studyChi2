@@ -34,6 +34,8 @@ class Analyzer(object):
             tree=NTupleHandler(self.dataFile,eventType)
             # loop over algorithms
             for  algorithm in self.algorithms.itervalues():
+                if not algorithm.NeedToBeRun(eventType):
+                    continue
                 # fill the historams
                 for event in range(0,tree.getEntry()):
                     if algorithm.NeedToBeFilledInLoop():
