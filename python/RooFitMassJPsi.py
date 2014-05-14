@@ -95,6 +95,8 @@ class RooFitMassJPsi(AlgorithmBase):
 
 
     def ClearData(self):
+
         self.histograms= { }
+
 
 
