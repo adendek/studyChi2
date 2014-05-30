@@ -9,15 +9,15 @@ class MyTestCase(unittest.TestCase):
 
     def testHandlerInitializationShouldnotRised(self):
         try:
-            handler= NTupleHandler('../data/new_NTuple.root','StdLooseJpsi2MuMuTuple')
+            handler= NTupleHandler('../data/MC.root','StdLooseJpsi2MuMuTuple')
 
         except AnalysisError as e:
             self.failureException()
     def testHandlerShouldReturnNoEvents(self):
 
-        handler= NTupleHandler('../data/new_NTuple.root','StdLooseJpsi2MuMuTuple')
-        self.assertGreater(handler.getEntry(),0)
-        handler.getEntry()
+        handler= NTupleHandler('../data/MC.root','StdLooseJpsi2MuMuTuple')
+        self.assertGreater(handler.getEntries(),0)
+
 
 if __name__ == '__main__':
      unittest.main()

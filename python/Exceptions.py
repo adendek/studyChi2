@@ -18,7 +18,9 @@ class InputError(AnalysisError):
         self.msg="File open error " + file
 
 
-
+class TypeTTreeError(AnalysisError):
+    def __init__(self):
+        self.msg="Cast to TTree error"
 
 
 

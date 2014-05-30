@@ -2,12 +2,12 @@ __author__ = 'ja'
 
 from ROOT import *
 from Exceptions import  *
+#algorithms
 from Chi2Analyzer import *
 from RooFitMassJPsi import  *
-
+from RooFitMassKs import *
+from CorrelationAnalysis import  *
 from NTupleHandler import *
-
-
 import os.path
 
 
@@ -17,9 +17,10 @@ class Analyzer(object):
         self.dataFile=dataFile
         # initialization of algorithm dictionary"
         self.algorithms={ }
-        self.algorithms["Chi2Analyzer"]=Chi2Analyzer()
-        self.algorithms["RooFitMassJPsi"]=RooFitMassJPsi()
-
+        #self.algorithms["Chi2Analyzer"]=Chi2Analyzer()
+        #self.algorithms["RooFitMassJPsi"]=RooFitMassJPsi()
+        #self.algorithms["RooFitMassKs"]=RooFitMassKs()
+        self.algorithms["CorrelationAnalysis"]=CorrelationAnalysis()
         # initialization of event types"
         self.eventTypes= ["StdLooseJpsi2MuMuTuple", "StdLooseKsLLTuple", "StdLooseKsDDTuple", "StdKs2PiPiLLTuple","StdKs2PiPiDDTuple" ]
         # create output file
@@ -37,9 +38,11 @@ class Analyzer(object):
                 if not algorithm.NeedToBeRun(eventType):
                     continue
                 # fill the historams
-                for event in range(0,tree.getEntry()):
-                    if algorithm.NeedToBeFilledInLoop():
+                if algorithm.NeedToBeFilledInLoop():
+                    for event in range(tree.getEntries()):
+                        tree.tree.GetEntry(event)
                         algorithm.Fill(tree)
+
                 if not algorithm.NeedToBeFilledInLoop():
                     algorithm.Fill(tree)
                 #process data

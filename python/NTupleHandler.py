@@ -21,7 +21,9 @@ class NTupleHandler(object):
         self.dir=self.f.Get(eventType)
         if self.dir is None:
             raise InputError("directory Error"+eventType)
-        self.tree =self.dir.Get('particle')
+        self.tree =self.dir.Get('particles')
+        if not isinstance(self.tree,TTree):
+            raise TypeTTreeError()
 
-    def getEntry(self):
+    def getEntries(self):
         return self.tree.GetEntriesFast()

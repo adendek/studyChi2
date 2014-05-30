@@ -61,7 +61,6 @@ class RooFitMassJPsi(AlgorithmBase):
         #fit to data and
 
         result=model.fitTo(data,RooFit.Extended(), RooFit.Minos(), RooFit.Save())
-        self.histograms["fited"]=data
 
         # create output
         xframe=x.frame(RooFit.Title("Mass Fit JPsi"))
@@ -85,6 +84,9 @@ class RooFitMassJPsi(AlgorithmBase):
         frame2 = x.frame(RooFit.Title("Pull Distribution"))
         frame2.addPlotable(hpull,"P")
         self.histograms["Pull"]=frame2
+
+
+
 
 
     def SaveOutput(self):
