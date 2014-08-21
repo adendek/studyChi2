@@ -47,11 +47,18 @@ class Chi2Analyzer(AlgorithmBase):
         histogram_name="h_"+name
         histogram_name1=histogram_name+"_track0"
         histogram_name2=histogram_name+"_track1"
+
+
         cmd1= "track0." + name + ">>" + histogram_name1
         cmd2= "track1." + name + ">>" + histogram_name2
 
-        tree.tree.Draw(cmd1)
-        tree.tree.Draw(cmd2)
+        cutCommand1="track0."+name+"<12"
+        cutCommand2="track1."+name+"<12"
+
+        tree.tree.Draw(cmd1,cutCommand1)
+        tree.tree.Draw(cmd2,cutCommand2)
         self.histograms[histogram_name1]= gROOT.FindObject(histogram_name1)
         self.histograms[histogram_name2]= gROOT.FindObject(histogram_name2)
         print "End of fill Chi2Analyzer with "+name
+
+
